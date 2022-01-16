@@ -1,19 +1,15 @@
 (function(){
-    //разделить код на список дел мамы, мой и папы, сделать так что бы ывполненные задачи подсвечивались зеленым при перезагрузки страницы  
+ 
     let arrLocalStore = [];
-
-    if(localStorage.getItem("myTodoList")) {// если список уже существует, то обновляет внутренний массив котором храним старые и добавляем новые объекты
-        let elem = JSON.parse(localStorage.getItem("myTodoList"))
-        arrLocalStore = elem 
-    }
 
     function createAppTitle(title) {
         let appTitle = document.createElement("h2")
+        appTitle.setAttribute("id", "titleh2")
         appTitle.innerHTML = title;
         return appTitle
     }
-
-    function createTodoItemFom () {
+    
+    function createTodoItemForm () {
         let form  = document.createElement("form");
         let input = document.createElement("input");
         let buttonWrapper  = document.createElement("div");
@@ -90,24 +86,77 @@
 
     function createTodoApp(container, title ="Список дел") {
     
-        let todoAppTitle = createAppTitle(title);
-        let todoItemForm = createTodoItemFom();
-        let todoList = createTodoList();
+        document.title = title; //Делаем title страницыв head равным заголовку
 
-        container.append(todoAppTitle);
-        container.append(todoItemForm.form);
-        container.append(todoList);
-
-        if(localStorage.getItem("myTodoList")) { //если есть данные в локал стор, то загрузим его на страницу
-            let elem = JSON.parse(localStorage.getItem("myTodoList"));//
-
-            for(let key of elem){
-                console.log(key)
-                let todoItem = createTodoItem(key["name"],key["done"]);
-                todoList.append(todoItem.item)
+        if(title === "мои дела") {
+            if(localStorage.getItem("myTodoList")) {// если список уже существует, то обновляет внутренний массив котором храним старые и добавляем новые объекты
+                let elem = JSON.parse(localStorage.getItem("myTodoList"))
+                arrLocalStore = elem 
             }
             
+        } else if (title === "дела мамы"){
+            if(localStorage.getItem("momTodoList")) {// если список уже существует, то обновляет внутренний массив котором храним старые и добавляем новые объекты
+                let elem = JSON.parse(localStorage.getItem("momTodoList"))
+                arrLocalStore = elem 
+            }
+        } else if(title === "дела папы") {
+            if(localStorage.getItem("dadTodoList")) {// если список уже существует, то обновляет внутренний массив котором храним старые и добавляем новые объекты
+                let elem = JSON.parse(localStorage.getItem("dadTodoList"))
+                arrLocalStore = elem 
+            }
+        }
+
+        let todoAppTitle = createAppTitle(title);
+        let todoItemForm = createTodoItemForm();
+        let todoList = createTodoList();
+
+        if(document.getElementById("todo-app").childNodes.length === 3) {// если элементы уже есть на странице, то обновляем их 
+            document.getElementById("todo-app").childNodes[0].replaceWith(todoAppTitle);
+            document.getElementById("todo-app").childNodes[1].replaceWith(todoItemForm.form) ;
+            document.getElementById("todo-app").childNodes[2].replaceWith(todoList);
+        } else {
+            container.append(todoAppTitle);
+            container.append(todoItemForm.form);
+            container.append(todoList);
+        }
+       
+
+        
+
+        if(title === "мои дела") {
+            if(localStorage.getItem("myTodoList")) { //если есть данные в локал стор, то загрузим его на страницу
+                let elem = JSON.parse(localStorage.getItem("myTodoList"));//
+    
+                for(let key of elem){
+                    let todoItem = createTodoItem(key["name"],key["done"]);
+                    todoList.append(todoItem.item)
+                }
+                
+            } 
         } 
+        if(title === "дела мамы"){
+            if(localStorage.getItem("momTodoList")) { //если есть данные в локал стор, то загрузим его на страницу
+                let elem = JSON.parse(localStorage.getItem("momTodoList"));//
+    
+                for(let key of elem){
+                    let todoItem = createTodoItem(key["name"],key["done"]);
+                    todoList.append(todoItem.item)
+                }
+                
+            } 
+        }
+
+        if(title === "дела папы"){
+            if(localStorage.getItem("dadTodoList")) { //если есть данные в локал стор, то загрузим его на страницу
+                let elem = JSON.parse(localStorage.getItem("dadTodoList"));//
+    
+                for(let key of elem){
+                    let todoItem = createTodoItem(key["name"],key["done"]);
+                    todoList.append(todoItem.item)
+                }  
+            } 
+        }
+        
 
         todoItemForm.form.addEventListener("submit", function(e) {
             e.preventDefault();
@@ -126,17 +175,33 @@
             elem = todoItem.item.childNodes[0].textContent;
             let obj = {name: elem, done: false}// создаем объект с задачей
             arrLocalStore.push(obj)
-            localStorage.setItem("myTodoList", JSON.stringify(arrLocalStore));// закидываю ее в локалстор
+
+            if(title === "мои дела") {
+                localStorage.setItem("myTodoList", JSON.stringify(arrLocalStore));// закидываю ее в локалстор
+            }
+
+            if(title === "дела мамы") {
+                localStorage.setItem("momTodoList", JSON.stringify(arrLocalStore));// закидываю ее в локалстор
+
+            }
+
+            if(title === "дела папы") {
+                localStorage.setItem("dadTodoList", JSON.stringify(arrLocalStore));// закидываю ее в локалстор
+
+            }
+
 
             todoItemForm.input.value = "";
         })
+
+        return container
     }
     
-
-
     function doneButton(elem){
-        elem.parentNode.parentNode.classList.toggle("list-group-item-success");//получил содержимое в задаче через его дочернюю кнопку в li, затем повесил на него событие изменения цвета
+
         
+        elem.parentNode.parentNode.classList.toggle("list-group-item-success");//получил содержимое в задаче через его дочернюю кнопку в li, затем повесил на него событие изменения цвета
+    
         arrLocalStore.filter(function(item){ //получаем задачи из локального массива, в котором сохранены данные из локал стор и изменяем состояние задани, после чего отправляем его в локал стор
             if (item.name === elem.parentNode.parentNode.childNodes[0].textContent) {
                 
@@ -148,23 +213,72 @@
             }
             return arrLocalStore
         })
-      localStorage.setItem("myTodoList",JSON.stringify(arrLocalStore))
+        
+        if(document.title === "мои дела"){
+            localStorage.setItem("myTodoList",JSON.stringify(arrLocalStore))
+        } else if (document.title === "дела мамы") {
+            localStorage.setItem("momTodoList",JSON.stringify(arrLocalStore))
+        } else if (document.title === "дела папы") {
+            localStorage.setItem("dadTodoList",JSON.stringify(arrLocalStore))
+        }
+        
+
     }
 
     function deleteButton(elem){
-        arrLocalStore.filter(function(item){
-            if (item.name === elem.parentNode.parentNode.childNodes[0].textContent) {//нашли совпадение с текстом
-                if(confirm("Вы уверены")) {
-                    elem.parentNode.parentNode.remove()//удалил элемент сразу на страничке
-                    arrLocalStore.splice(arrLocalStore.indexOf(item),1)//нашел совпадающий индекс в массиве и удалил его из массива 
+
+        if (document.title === "мои дела") {
+            arrLocalStore.filter(function(item){
+                if (item.name === elem.parentNode.parentNode.childNodes[0].textContent) {//нашли совпадение с текстом
+                    if(confirm("Вы уверены")) {
+                        arrLocalStore.splice(arrLocalStore.indexOf(item),1);//нашел совпадающий индекс в массиве и удалил его из массива     
+                    }
+                    
                 }
-                
-            }
-            return arrLocalStore
-        })
-        localStorage.setItem("myTodoList",JSON.stringify(arrLocalStore))
+                return arrLocalStore;
+            })
+            localStorage.setItem("myTodoList",JSON.stringify(arrLocalStore));
+
+            let result = createTodoApp(document.getElementById("todo-app"),"мои дела"); 
+            document.getElementById("todo-app").replaceWith(result);//заменяем контейнер новым отрисованным результатом
+
+        } else if (document.title === "дела мамы") {
+            arrLocalStore.filter(function(item){
+                if (item.name === elem.parentNode.parentNode.childNodes[0].textContent) {//нашли совпадение с текстом
+                    if(confirm("Вы уверены")) {
+                        arrLocalStore.splice(arrLocalStore.indexOf(item),1);//нашел совпадающий индекс в массиве и удалил его из массива 
+                    }
+                    
+                }
+                return arrLocalStore;
+            })
+            localStorage.setItem("momTodoList",JSON.stringify(arrLocalStore));
+
+            let result = createTodoApp(document.getElementById("todo-app"),"дела мамы");
+            document.getElementById("todo-app").replaceWith(result);//заменяем контейнер новым отрисованным результатом
+
+        } else if (document.title === "дела папы") {
+            arrLocalStore.filter(function(item){
+                if (item.name === elem.parentNode.parentNode.childNodes[0].textContent) {//нашли совпадение с текстом
+                    if(confirm("Вы уверены")) {
+                        arrLocalStore.splice(arrLocalStore.indexOf(item),1);//нашел совпадающий индекс в массиве и удалил его из массива 
+                    }
+                    
+                }
+                return arrLocalStore;
+            })
+            localStorage.setItem("dadTodoList",JSON.stringify(arrLocalStore));
+
+            let result = createTodoApp(document.getElementById("todo-app"),"дела папы");  
+            document.getElementById("todo-app").replaceWith(result);//заменяем контейнер новым отрисованным результатом
+        }
+
+    
+        
+        
     }
    
+ 
     window.createTodoApp = createTodoApp;
     window.doneButton = doneButton;
     window.deleteButton = deleteButton;

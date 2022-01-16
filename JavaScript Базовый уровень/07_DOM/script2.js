@@ -5,9 +5,10 @@ let wrap = document.getElementById("wrap")
 
 wrap.append(h2)
 wrap.append(input)
- 
+let id;
 input.oninput = () =>  {
-    setTimeout(()=> {
+    clearTimeout(id);
+    id = setTimeout(()=> {
         h2.textContent = input.value
-    },300)
+    },400)
 }

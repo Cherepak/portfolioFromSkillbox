@@ -12,21 +12,16 @@ timer.addEventListener("click", ()=>{
 
         let intervalId = setInterval(()=> {
             outNumber.textContent = --n 
-            
-            
+             
             if(n === 0 ) {
                 flag = true
                 clearInterval(intervalId)
             }
-        }, 600)
+
+            timer.addEventListener("click", ()=> {clearInterval(intervalId)}) //если нажали клик еще раз, все выполняется заново с новым числом из инпут 
+        }, 800)
         
         var flag = false;
-    
-        if(flag) {
-            console.log(n)
-            
-        }
-    
     }
     
 
